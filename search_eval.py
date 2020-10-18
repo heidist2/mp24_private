@@ -1,17 +1,66 @@
 import math
 import sys
 import time
+
 import metapy
 import pytoml
+idx = metapy.index.make_inverted_index('config.toml')
+class InL2Ranker(metapy.index.RankingFunction):
+    """
+    Create a new ranking function in Python that can be used in MeTA.
+    """
+    def __init__(self, some_param=1.0):
+        #idx = metapy.index.make_inverted_index('config.toml')
+        #self.param = some_param
+        """
+        Q_D_T = metapy.index.Document()
+        N = idx.num_docs()
+        print (N)
+        avgdl = idx.avg_doc_length()
+        print (avgdl)
+        total_corpus = idx.total_corpus_terms()
+        print (total_corpus)
+        """
+        # You *must* call the base class constructor here!
+
+        super(InL2Ranker, self).__init__()
+
+    def score_one(self, sd):
+        """
+        You need to override this function to return a score for a single term.
+        For fields available in the score_data sd object,
+        @see https://meta-toolkit.org/doxygen/structmeta_1_1index_1_1score__data.html
+        """
+        #idx = metapy.index.make_inverted_index('config.toml')
+        self.param = some_param
+        sd = metapy.index.Document()
+        #Q_D_T = metapy.index.Document()
+        #N = idx.num_docs()
+        N = sd.doc_unique_terms;
+        print ("N")
+        #avgdl = idx.avg_doc_length()
+        #avgdl = idx.avg_dl()
+        avgdl = sd.doc_size
+        print ("avgdl")
+        print (sd.doc_size())
+
+        total_corpus = sd.doc_term_count
+        #total_corpus = idx.total_corpus_terms()
+        print (total_corpus)
+
+        print (self.param + sd.doc_term_count) / (self.param * sd.doc_unique_terms + sd.doc_size)
+        return (self.param + sd.doc_term_count) / (self.param * sd.doc_unique_terms + sd.doc_size)
 
 
 def load_ranker(cfg_file):
     """
-    Use this function to return the Ranker object to evaluate, 
+    Use this function to return the Ranker object to evaluate, e.g. return InL2Ranker(some_param=1.0)
     The parameter to this function, cfg_file, is the path to a
-    configuration file used to load the index.
+    configuration file used to load the index. You can ignore this for MP2.
     """
-    return metapy.index.OkapiBM25()
+    #return metapy.index.JelinekMercer() <<original
+    return InL2Ranker(some_param=1.0)
+    #return InL2Ranker()
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -20,6 +69,8 @@ if __name__ == '__main__':
 
     cfg = sys.argv[1]
     print('Building or loading index...')
+
+    #idx = metapy.index.make_inverted_index('config.toml')
     idx = metapy.index.make_inverted_index(cfg)
     ranker = load_ranker(cfg)
     ev = metapy.index.IREval(cfg)
@@ -38,17 +89,16 @@ if __name__ == '__main__':
     query_start = query_cfg.get('query-id-start', 0)
 
     query = metapy.index.Document()
-    ndcg = 0.0
-    num_queries = 0
-
+    #ranker = metapy.index.OkapiBM25(k1=1.2,b=0.75,k3=500)
+    ranker = metapy.index.DirichletPrior(mu=1000)
     print('Running queries')
+    print (query)
+    print (ranker)
     with open(query_path) as query_file:
         for query_num, line in enumerate(query_file):
             query.content(line.strip())
             results = ranker.score(idx, query, top_k)
-            ndcg += ev.ndcg(results, query_start + query_num, top_k)
-            num_queries+=1
-    ndcg= ndcg / num_queries
-            
-    print("NDCG@{}: {}".format(top_k, ndcg))
+            avg_p = ev.avg_p(results, query_start + query_num, top_k)
+            print("Query {} average precision: {}".format(query_num + 1, avg_p))
+    print("Mean average precision: {}".format(ev.map()))
     print("Elapsed: {} seconds".format(round(time.time() - start_time, 4)))
