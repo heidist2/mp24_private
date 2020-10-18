@@ -13,6 +13,7 @@ class InL2Ranker(metapy.index.RankingFunction):
         #idx = metapy.index.make_inverted_index('config.toml')
         #self.param = some_param
         """
+        TEST
         Q_D_T = metapy.index.Document()
         N = idx.num_docs()
         print (N)
