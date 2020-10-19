@@ -13,7 +13,7 @@ def load_ranker(cfg_file):
     """
     #return metapy.index.PivotedLength(.339)
     #return metapy.index.OkapiBM25()
-    return metapy.index.OkapiBM25(k1=1.19,b=0.76,k3=500)
+    return metapy.index.OkapiBM25(k1=1.199,b=0.759,k3=500)
     #return metapy.index.DirichletPrior(mu=187.9)
     #return metapy.index.JelinekMercer(1000)
     #return metapy.index.AbsoluteDiscount(.532)
