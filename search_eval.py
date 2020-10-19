@@ -11,11 +11,11 @@ def load_ranker(cfg_file):
     The parameter to this function, cfg_file, is the path to a
     configuration file used to load the index.
     """
-    #return metapy.index.PivotedLength(.33)
+    return metapy.index.PivotedLength(.339)
     #return metapy.index.OkapiBM25()
     #return metapy.index.DirichletPrior(mu=209.75)
     #return metapy.index.JelinekMercer(1000)
-    return metapy.index.AbsoluteDiscount(.532)
+    #return metapy.index.AbsoluteDiscount(.532)
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
